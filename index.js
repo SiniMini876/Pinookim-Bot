@@ -30,8 +30,6 @@ bot.on("shardDisconnect", (event, id) =>
 );
 bot.on("shardReconnecting", id => console.log(`Shard ${id} reconnecting...`));
 
-
-
 bot.on("message", async msg => {
   // eslint-disable-line
   if (msg.author.bot) return;
