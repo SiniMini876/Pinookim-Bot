@@ -13,7 +13,6 @@ const bot = new Client({
   disableMentions: "all"});
 require("./server.js");
 
-
 bot.on("warn", console.warn);
 bot.on("error", console.error);
 bot.on("ready", () =>
