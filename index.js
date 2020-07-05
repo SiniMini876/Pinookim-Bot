@@ -46,34 +46,6 @@ bot.on("message", async msg => {
   let command = msg.content.toLowerCase().split(" ")[0];
   command = command.slice(PREFIX.length);
 
-  if (command === "help" || "h") {
-    const helpembed = new Discord.MessageEmbed()
-    .setColor("#7289DA")
-    .setDescription(
-      `
-__**Commands List**__
-
-**פקודות לסקרים**
-> \`poll\` = וואלק תכתוב poll ואז את השאלה שאתה רוצה לשאול
-
-**פקודות לפריקינג מוזיקה בחדרים**
-> **\`play [title/url]\`**
-> **\`search [title]\`**
-> \`skip = יעביר לך שיר\`
-> \`stop = יעצור לך את הפריקינג דבר המחורבן הזה\`
-> \`pause = זה כי אני מניאק ואני רוצה שרק תשהה את השיר\`
-> \`resume = זה כי אתה מפגר שרוצה להמשיך עם הזוואות של המוזיקה הישראלית\`
-> \`nowplaying = זה כי אני מגניב שרוצה להראות לך את השיר שמנוגן\`
-> \`queue = זה כי אני מגניב שמראה לך את השירים שבתור\`
-> \`volume = זה כי אני מתחשב בזה שהשיר אולי יחריש לך את האוזניים\``
-    )
-    .setFooter(
-      "©️ SiniMini876",
-    );
-    msg.author.send(helpembed);
-    msg.delete({ timeout: 5000 }).catch(console.error);
-  }
-
   if (command === "play" || command === "p") {
     const voiceChannel = msg.member.voice.channel;
     if (!voiceChannel){
