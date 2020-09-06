@@ -8,6 +8,7 @@ const GOOGLE_API_KEY = process.env.YTAPI_KEY;
 const PREFIX = process.env.PREFIX;
 const cooldown = new Set();
 const youtube = new YouTube(GOOGLE_API_KEY);
+const restart = require('restart');
 const queue = new Map();
 const bot = new Client({
   disableMentions: "all"});
@@ -42,7 +43,13 @@ bot.on("message", async msg => {
 
   let command = msg.content.toLowerCase().split(" ")[0];
   command = command.slice(PREFIX.length);
+  if(command === 'test') return msg.channel.send('Test!').then(m => m.delete({ timeout: 5000 }));
 
+  if (command === "restart") {
+    if(!msg.member.roles.cache.find(r => r.name === 'DEV')) return;
+    msg.channel.send('Restarting...');
+    restart({entry: './index.js'});
+  }
   if (command === "play" || command === "p") {
     const voiceChannel = msg.member.voice.channel;
     if (!voiceChannel){
@@ -203,7 +210,8 @@ Please provide a value to select one of the search results ranging from 1-10.
     serverQueue.volume = args[1];
     serverQueue.connection.dispatcher.setVolume(args[1] / 100);
     return msg.channel.send(`I set the volume to: **\`${args[1]}%\`**`);
-  } else if (command === "nowplaying" || command === "np") {
+  } 
+  else if (command === "nowplaying" || command === "np") {
     if (!serverQueue) return msg.channel.send("אין שום מוזיקה מתנגנת כרגע");
     return msg.channel.send(
       `🎶  **|**  Now Playing: **\`${serverQueue.songs[0].title}\`**`
