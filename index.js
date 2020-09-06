@@ -8,7 +8,6 @@ const GOOGLE_API_KEY = process.env.YTAPI_KEY;
 const PREFIX = process.env.PREFIX;
 const cooldown = new Set();
 const youtube = new YouTube(GOOGLE_API_KEY);
-const restart = require('restart');
 const queue = new Map();
 const bot = new Client({
   disableMentions: "all"});
@@ -47,8 +46,8 @@ bot.on("message", async msg => {
 
   if (command === "restart") {
     if(!msg.member.roles.cache.find(r => r.name === 'DEV')) return;
-    msg.channel.send('Restarting...');
-    restart({entry: './index.js'});
+    bot.destroy();
+    bot.login(process.env.BOT_TOKEN);
   }
   if (command === "play" || command === "p") {
     const voiceChannel = msg.member.voice.channel;
