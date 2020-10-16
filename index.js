@@ -67,11 +67,11 @@ bot.on("message", async msg => {
 
   if (command === "restart") {
 
-    let restartPermission = ['474584102335676427', '256453875635191810', '315849563594293259', '627029564224438274', '741699710674272327', '472071709722411026', '752139100340879460', '487702977000243212', '451819243248418847']
+    let restartPermission = ['474584102335676427', '256453875635191810', '315849563594293259', '627029564224438274', '741699710674272327', '472071709722411026', '752139100340879460', '487702977000243212', '451819243248418847', '594184772453007382']
 
     if(!msg.member.voice.channel.id) return; 
     const voiceChannel = msg.member.voice.channel;
-    if(!restartPermission.includes(msg.member.id)) return msg.channel.send('תשמע אחי אין לך הרשאה לעשות ריסטארט מסיני המלך יש מצב שהוא שכח לתת לך, בכל מקרה תפנה לסיני המזניב').then(m => m.delete({timeout: 5000}))
+    if(!restartPermission.includes(msg.member.id)) return msg.channel.send('תשמע אחי אין לך הרשאה לעשות ריסטארט מסיני המלך יש מצב שהוא שכח לתת לך, בכל מקרה תפנה לסיני המזניב').then(m => msg.delete({timeout: 5000}))
     bot.destroy();
     bot.login(process.env.BOT_TOKEN);
     queue.delete(msg.guild.id);
