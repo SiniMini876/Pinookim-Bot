@@ -122,13 +122,7 @@ bot.on("message", async msg => {
         }
       }
       handleVideo(video, msg, voiceChannel);
-
-      setInterval( async () => {
-        if(!voiceChannel.members.find(m => m.id === msg.member.id)){
-          var connection = await voiceChannel.leave();
-        }
-      }, 5000)
-
+      
       return msg.delete({ timeout: 5000 }).catch(console.error);
     }
 
@@ -370,6 +364,7 @@ function play(guild, song, voiceChannel, msg) {
   return setInterval( async () => {
     if(!voiceChannel.members.find(m => m.id === msg.member.id)){
       var connection = await voiceChannel.leave();
+      queue.delete(guild.id)
     }
   }, 5000)
 }
