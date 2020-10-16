@@ -44,10 +44,36 @@ bot.on("message", async msg => {
   command = command.slice(PREFIX.length);
   if(command === 'test') return msg.channel.send('Test!').then(m => m.delete({ timeout: 5000 }));
 
+  if(command === 'setstatus'){
+    if(!args[1]) return msg.channel.send('אתה חייב להחליט על מה אני אעשה, תנסה PLAYING STREAMING LISTENING');
+    if(!args[2]) return msg.channel.send('לא החלטת על קישור, אם אתה בחרת לא בסוג STREAMING פשוט תכתוב משו')
+    try{
+      var content = msg.content.indexOf('?');
+      var cont = args.join(content + 1);
+      if(!args.join(content + 1)) return msg.channel.send('לא החלטת על סטאטוס שיהיה לי.');
+
+      bot.user.setPresence({
+        status: 'online',
+        activity: {
+          name: cont,
+          type: args[0],
+          url: args[1],
+        },
+      });
+    }catch(err){
+      msg.channel.send('ERR')
+    }
+  } 
+
   if (command === "restart") {
+    if(!msg.member.voice.channel.id) return; 
+    const voiceChannel = msg.member.voice.channel;
     if(!msg.member.roles.cache.find(r => r.name === 'DEV')) return;
     bot.destroy();
     bot.login(process.env.BOT_TOKEN);
+    queue.delete(msg.guild.id);
+    var connection = await voiceChannel.leave();
+    msg.channel.send('עושה ריסטארט נשמה')
   }
   if (command === "play" || command === "p") {
     const voiceChannel = msg.member.voice.channel;
@@ -60,7 +86,7 @@ bot.on("message", async msg => {
     if (!permissions.has("CONNECT")) {
       return msg.channel.send(
         "Sorry, but I need **`CONNECT`** permissions to proceed!"
-      ); msg.delete({ timeout: 5000 }).catch(console.error);
+      ); 
     }
     if (!permissions.has("SPEAK")) {
       return msg.channel.send(
@@ -95,8 +121,17 @@ bot.on("message", async msg => {
           );
         }
       }
-      return handleVideo(video, msg, voiceChannel);
+      handleVideo(video, msg, voiceChannel);
+
+      setInterval( async () => {
+        if(!voiceChannel.members.find(m => m.id === msg.member.id)){
+          var connection = await voiceChannel.leave();
+        }
+      }, 5000)
+
+      return msg.delete({ timeout: 5000 }).catch(console.error);
     }
+
   }
   if (command === "search" || command === "sc") {
     const voiceChannel = msg.member.voice.channel;
@@ -151,9 +186,9 @@ Please provide a value to select one of the search results ranging from 1-10.
             );
           } catch (err) {
             console.error(err);
-            return msg.channel.send(
+            msg.channel.send(
               "לא מצאתי מענה נכון לבחירת השיר, תנסה לחפש שוב"
-            ); msg.delete({ timeout: 5000 }).catch(console.error);
+            ); return msg.delete({ timeout: 5000 }).catch(console.error);
           }
           const videoIndex = parseInt(response.first().content);
           var video = await youtube.getVideoByID(videos[videoIndex - 1].id);
@@ -161,10 +196,11 @@ Please provide a value to select one of the search results ranging from 1-10.
           console.error(err);
           return msg.channel.send(
             "🆘  **|**  לא מצאתי תוצאות בחיפוש תנסה לחפש משהו אחר ינעל דינאק"
-          ); msg.delete({ timeout: 5000 }).catch(console.error);
+          ); 
         }
       }
-      return handleVideo(video, msg, voiceChannel);
+      handleVideo(video, msg, voiceChannel);
+      return msg.delete({ timeout: 5000 }).catch(console.error);
     }
   }
   else if (command === "skip") {
@@ -205,43 +241,47 @@ Please provide a value to select one of the search results ranging from 1-10.
     if (isNaN(args[1]) || args[1] > 100)
       return msg.channel.send(
         "עוצמת שמע יכולה להיקבע רק על פי **1** - **100**"
-      );msg.delete({ timeout: 5000 }).catch(console.error);
+      );
     serverQueue.volume = args[1];
     serverQueue.connection.dispatcher.setVolume(args[1] / 100);
-    return msg.channel.send(`I set the volume to: **\`${args[1]}%\`**`);
+    msg.channel.send(`I set the volume to: **\`${args[1]}%\`**`);
+    return msg.delete({ timeout: 5000 }).catch(console.error);
   } 
   else if (command === "nowplaying" || command === "np") {
     if (!serverQueue) return msg.channel.send("אין שום מוזיקה מתנגנת כרגע");
-    return msg.channel.send(
+    msg.channel.send(
       `🎶  **|**  Now Playing: **\`${serverQueue.songs[0].title}\`**`
     );
+    return msg.delete({ timeout: 5000 }).catch(console.error);
   } 
   else if 
   (command === "queue" || command === "q") {
     if (!serverQueue) return msg.channel.send("אין שום מוזיקה מתנגנת כרגע");
-    return msg.channel.send(`
+    msg.channel.send(`
 __**Song Queue**__
 
 ${serverQueue.songs.map(song => `**-** ${song.title}`).join("\n")}
 
 **Now Playing: \`${serverQueue.songs[0].title}\`**
-        `);msg.delete({ timeout: 5000 }).catch(console.error);
+        `); return msg.delete({ timeout: 5000 }).catch(console.error);
   } 
   else if (command === "pause") {
     if (serverQueue && serverQueue.playing) {
       serverQueue.playing = false;
       serverQueue.connection.dispatcher.pause();
       return msg.channel.send("⏸  **|**  הפסקתי את המוזיקה בשבילך, ידידי הצעיר");
-    }msg.delete({ timeout: 5000 }).catch(console.error);
-    return msg.channel.send("אין שום מוזיקה מתנגנת כרגע");
+    }
+    msg.channel.send("אין שום מוזיקה מתנגנת כרגע");
+    return msg.delete({ timeout: 5000 }).catch(console.error);
   } 
   else if (command === "resume") {
     if (serverQueue && !serverQueue.playing) {
       serverQueue.playing = true;
       serverQueue.connection.dispatcher.resume();
       return msg.channel.send("▶  **|**  הפעלתי את המוזיקה בשבילך, ידידי הצעיר");
-    }msg.delete({ timeout: 5000 }).catch(console.error);
-    return msg.channel.send("אין שום מוזיקה מתנגנת כרגע");
+    }
+    msg.channel.send("אין שום מוזיקה מתנגנת כרגע");
+    return msg.delete({ timeout: 5000 }).catch(console.error);
   } 
   else if (command === "loop") {
     if (serverQueue) {
@@ -250,7 +290,7 @@ ${serverQueue.songs.map(song => `**-** ${song.title}`).join("\n")}
         `:repeat: **|** Loop ${
           serverQueue.loop === true ? "enabled" : "disabled"
         }!`
-      );msg.delete({ timeout: 5000 }).catch(console.error);
+      )
     }
     return msg.channel.send("אין שום מוזיקה מתנגנת כרגע");
     msg.delete({ timeout: 5000 }).catch(console.error);
@@ -281,7 +321,7 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
     try {
       var connection = await voiceChannel.join();
       queueConstruct.connection = connection;
-      play(msg.guild, queueConstruct.songs[0]);
+      play(msg.guild, queueConstruct.songs[0], voiceChannel, msg);
     } catch (error) {
       console.error(`I could not join the voice channel: ${error}`);
       queue.delete(msg.guild.id);
@@ -297,10 +337,10 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
         `<:yes:591629527571234819>  **|** **\`${song.title}\`** has been added to the queue!`
       );
   }
-  return;
+
 }
 
-function play(guild, song) {
+function play(guild, song, voiceChannel, msg) {
   const serverQueue = queue.get(guild.id);
 
   if (!song) {
@@ -326,6 +366,12 @@ function play(guild, song) {
     description: `🎶  **|**  Start Playing: **\`${song.title}\`**`
     }
   });
+
+  return setInterval( async () => {
+    if(!voiceChannel.members.find(m => m.id === msg.member.id)){
+      var connection = await voiceChannel.leave();
+    }
+  }, 5000)
 }
 
 bot.login(TOKEN);
