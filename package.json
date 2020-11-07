@@ -1,43 +1,27 @@
 {
-  "name": "ahmed-bot",
-  "version": "1.0.0",
-  "description": "Example of a Music Bot project modified by Zealcord, made by iCrawl",
+  "name": "Pinookim-Bot",
+  "version": "1.0.1",
+  "description": "Alon get off prison, PLS",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ."
-  },
-  "keywords": [
-    "JavaScript",
-    "DiscordJS",
-    "NodeJS",
-    "Discord",
-    "SiniMini876"
-  ],
   "author": "SiniMini876",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/zealcordNation/music-bot-example/issues"
-  },
-  "homepage": "https://github.com/zealcordNation/music-bot-example#readme",
-  "engines": {
-    "node": "12.x"
-  },
+  "private": true,
+  "homepage": "",
+  "repository": "",
+  "bugs": "",
   "dependencies": {
-    "@discordjs/opus": "^0.3.2",
-    "ascii-table": "0.0.9",
-    "discord-player": "^3.0.0-beta.1",
-    "discord.js": "^12.2.0",
+    "@discordjs/opus": "^0.3.3",
+    "discord.js": "^12.4.1",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "simple-youtube-api": "^5.2.1",
-    "ytdl-core": "^2.1.7",
-    "zealcord.js": "^1.1.2"
+    "ffmpeg-static": "^4.2.3",
+    "lyrics-finder": "^21.0.5",
+    "simple-youtube-api": "^5.1.1",
+    "soundcloud-downloader": "^0.1.6",
+    "spotify-url-info": "^2.0.0",
+    "string-progressbar": "^1.0.1",
+    "ytdl-core": "^4.0.0",
+    "ytdl-core-discord": "^1.2.4"
   },
-  "optionalDependencies": {
-    "@discordjs/uws": "^10.149.0"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.4"
+  "scripts": {
+    "start": "node index.js"
   }
 }
