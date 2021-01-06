@@ -29,7 +29,7 @@ module.exports = {
 		console.log("The bot has been disconnected!")
 		client.login(process.env.TOKEN);
 		console.log("The bot has been reconnected!")
-		message.channel.send("עושה ריסטארט כפרע")
+		message.channel.send("חזרתי מהכלא!")
 
 	}
 }

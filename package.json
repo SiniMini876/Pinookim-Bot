@@ -18,8 +18,8 @@
     "soundcloud-downloader": "^0.1.6",
     "spotify-url-info": "^2.0.0",
     "string-progressbar": "^1.0.1",
-    "ytdl-core": "^4.0.0",
-    "ytdl-core-discord": "^1.2.4"
+    "ytdl-core": "^4.4.0",
+    "ytdl-core-discord": "^1.2.5"
   },
   "scripts": {
     "start": "node index.js"
