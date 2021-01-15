@@ -1,3 +1,11 @@
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => res.send('PinookimBot is Activate!'));
+
+app.listen(port, () => console.log(`PinookimBot is lisening on ${port}`));
+
 const { Client, Collection } = require("discord.js");
 const { readdirSync } = require("fs");
 const { ClientRequest } = require("http");
@@ -25,7 +33,7 @@ const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 client.on("ready", () => {
   console.log(`${client.user.username} ready!`);
-  client.user.setActivity(`${PREFIX}help and ${PREFIX}play`, { type : "LISTENING" });
+  client.user.setActivity(`משתהה בכלא`, { type : "PLAYING" });
 });
 client.on("warn", (info) => console.log(info));
 client.on("error", console.error);
