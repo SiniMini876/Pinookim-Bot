@@ -8,6 +8,7 @@ module.exports = (Discord, client, message) => {
 
     const command = client.commands.get(cmd)
     || client.commands.find(cd => cd.aliases && cd.aliases.includes(cmd));
+    if(!command) return;
 
     const cooldowns = client.cooldowns;
 
