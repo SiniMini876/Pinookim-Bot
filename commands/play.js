@@ -1,4 +1,4 @@
-const { play } = require("../include/play");
+const { play } = require("../Functions/play");
 const ytdl = require("ytdl-core");
 const YouTubeAPI = require("simple-youtube-api");
 const scdl = require("soundcloud-downloader");
@@ -17,7 +17,7 @@ const youtube = new YouTubeAPI(YOUTUBE_API_KEY);
 
 module.exports = {
   name: "play",
-  cooldown: 3,
+  cooldown: 5,
   aliases: ["p"],
   description: "Plays audio from YouTube or Soundcloud",
   async execute(message, args) {
@@ -50,8 +50,6 @@ module.exports = {
 
     // Start the playlist if playlist url was provided
     if (!videoPattern.test(args[0]) && playlistPattern.test(args[0])) {
-      return message.client.commands.get("playlist").execute(message, args);
-    } else if (scdl.isValidUrl(url) && url.includes("/sets/")) {
       return message.client.commands.get("playlist").execute(message, args);
     }
 

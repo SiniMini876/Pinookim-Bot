@@ -16,7 +16,8 @@ let allowedRestart = [
 module.exports = {
 	name: "restart",
 	aliases: "res",
-	description: "restart what the fuck did you think it did!!?!??!?",
+	cooldown: 10,
+	description: "restart what the fuck did you think it do!!?!??!?",
 	execute: async(message, args, client) => {
 
 		const Sini = message.guild.members.cache.find(m => m.id === "474584102335676427")
