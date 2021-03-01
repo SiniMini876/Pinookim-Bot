@@ -18,7 +18,7 @@ client.queue = new Map();
 client.prefix = PREFIX;
 
 ["event_handler", "command_handler"].forEach((handler) => {
-    require(`./src/handlers/${handler}`)(Discord, client);
+    require(`./handlers/${handler}`)(Discord, client);
 });
 
 client.login(TOKEN);
