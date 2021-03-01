@@ -1,19 +1,10 @@
-const { play } = require("../Functions/play");
+const { play } = require("./../Functions/play");
 const ytdl = require("ytdl-core");
-const YouTubeAPI = require("simple-youtube-api");
 const scdl = require("soundcloud-downloader");
 const spotify = require("spotify-url-info");
-
-let YOUTUBE_API_KEY, SOUNDCLOUD_CLIENT_ID;
-try {
-  const config = require("../config.json");
-  YOUTUBE_API_KEY = config.YOUTUBE_API_KEY;
-  SOUNDCLOUD_CLIENT_ID = config.SOUNDCLOUD_CLIENT_ID;
-} catch (error) {
-  YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-  SOUNDCLOUD_CLIENT_ID = process.env.SOUNDCLOUD_CLIENT_ID;
-}
-const youtube = new YouTubeAPI(YOUTUBE_API_KEY);
+const YTsearch = require("yt-search")
+let YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+let SOUNDCLOUD_CLIENT_ID = process.env.SOUNDCLOUD_CLIENT_ID;
 
 module.exports = {
   name: "play",
@@ -91,23 +82,24 @@ module.exports = {
           return message.reply("Could not find that Soundcloud track.").catch(console.error);
         return message.reply("There was an error playing that Soundcloud track.").catch(console.error);
       }
-    } else if(spotifyTrack.test(url) || spotifyPlaylist.test(url)){
+    } else if(spotifyTrack.test(url)){
       try{
         const trakInfo = await spotify.getPreview(url)
+        const track = await YTsearch.search(trakInfo.title)
+        const songInfo = await ytdl.getInfo(track.videos[0].url)
         song = {
-          title: trakInfo.title,
-          url: trakInfo.link,
-          audio: trakInfo.audio
+          title: songInfo.title,
+          url: songInfo.link,
+          audio: songInfo.audio
         }
       }
      catch (err) {
       console.log(err)
     }
-  }
-    else {
+    } else {
       try {
-        const results = await youtube.searchVideos(search, 1);
-        songInfo = await ytdl.getInfo(results[0].url);
+        const results = await YTsearch.search(search)
+        songInfo = await ytdl.getInfo(results.videos[0].url);
         song = {
           title: songInfo.videoDetails.title,
           url: songInfo.videoDetails.video_url,

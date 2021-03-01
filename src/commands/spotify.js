@@ -1,28 +1,24 @@
 const { MessageEmbed } = require("discord.js");
-const { play } = require("../Functions/play");
+const { play } = require("./../Functions/play");
 const YouTubeAPI = require("simple-youtube-api");
-const scdl = require("soundcloud-downloader");
+const spotify = require("spotify-url-info")
+const ytdl = require('ytdl-core')
+const yts = require("yt-search");
 
 let YOUTUBE_API_KEY, SOUNDCLOUD_CLIENT_ID, MAX_PLAYLIST_SIZE;
-try {
-  const config = require("../config.json");
-  YOUTUBE_API_KEY = config.YOUTUBE_API_KEY;
-  SOUNDCLOUD_CLIENT_ID = config.SOUNDCLOUD_CLIENT_ID;
-  MAX_PLAYLIST_SIZE = config.MAX_PLAYLIST_SIZE;
-} catch (error) {
+
   YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
   SOUNDCLOUD_CLIENT_ID = process.env.SOUNDCLOUD_CLIENT_ID;
   MAX_PLAYLIST_SIZE = process.env.MAX_PLAYLIST_SIZE;
-}
+
 const youtube = new YouTubeAPI(YOUTUBE_API_KEY);
 
 module.exports = {
-  name: "playlist",
+  name: "spotify",
   cooldown: 3,
-  aliases: ["pl"],
   description: "Play a playlist from youtube",
   async execute(message, args) {
-    const { PRUNING } = require("../config.json");
+    const PRUNING = true;
     const { channel } = message.member.voice;
 
     const serverQueue = message.client.queue.get(message.guild.id);
@@ -41,10 +37,7 @@ module.exports = {
     if (!permissions.has("SPEAK"))
       return message.reply("I cannot speak in this voice channel, make sure I have the proper permissions!");
 
-    const search = args.join(" ");
-    const pattern = /^.*(youtu.be\/|list=)([^#\&\?]*).*/gi;
     const url = args[0];
-    const urlValid = pattern.test(args[0]);
 
     const queueConstruct = {
       textChannel: message.channel,
@@ -59,57 +52,41 @@ module.exports = {
     let song = null;
     let playlist = null;
     let videos = [];
+    
+    playlist = await spotify.getPreview(url)
 
-    if (urlValid) {
-      try {
-        playlist = await youtube.getPlaylist(url, { part: "snippet" });
-        videos = await playlist.getVideos(MAX_PLAYLIST_SIZE || 10, { part: "snippet" });
-      } catch (error) {
-        console.error(error);
-        return message.reply("Playlist not found :(").catch(console.error);
-      }
-    } else if (scdl.isValidUrl(args[0])) {
-      if (args[0].includes("/sets/")) {
-        message.channel.send("⌛ fetching the playlist...");
-        playlist = await scdl.getSetInfo(args[0], SOUNDCLOUD_CLIENT_ID);
-        videos = playlist.tracks.map((track) => ({
-          title: track.title,
-          url: track.permalink_url,
-          duration: track.duration / 1000
-        }));
-      }
-    } else {
-      try {
-        const results = await youtube.searchPlaylists(search, 1, { part: "snippet" });
-        playlist = results[0];
-        videos = await playlist.getVideos(MAX_PLAYLIST_SIZE || 10, { part: "snippet" });
-      } catch (error) {
-        console.error(error);
-        return message.reply("Playlist not found :(").catch(console.error);
-      }
+    const playlistTracks = await spotify.getTracks(url);
+    // playlistTracks.forEach(async track => {
+    //   const results = await yts(track.name)
+    //   const songInfo = await ytdl.getInfo(results.videos[0].url)
+    //   song = {
+    //     title: songInfo.videoDetails.title,
+    //     url: songInfo.videoDetails.video_url,
+    //     duration: songInfo.videoDetails.lengthSeconds
+    //   };
+    // })
+
+
+    const results = await yts(playlistTracks[0].name)
+    const songInfo = await ytdl.getInfo(results.videos[0].url)
+    song = {
+      title: songInfo.videoDetails.title,
+      url: songInfo.videoDetails.video_url,
+      duration: songInfo.videoDetails.lengthSeconds
     }
-
-    videos.forEach((video) => {
-      song = {
-        title: video.title,
-        url: video.url,
-        duration: video.durationSeconds
-      };
-
-      if (serverQueue) {
-        serverQueue.songs.push(song);
-        if (!PRUNING)
-          message.channel
-            .send(`✅ **${song.title}** has been added to the queue by ${message.author}`)
-            .catch(console.error);
-      } else {
-        queueConstruct.songs.push(song);
-      }
-    });
+    if (serverQueue) {
+      serverQueue.songs.push(song);
+      if (!PRUNING)
+        message.channel
+          .send(`✅ **${song.title}** has been added to the queue by ${message.author}`)
+          .catch(console.error);
+    } else {
+      queueConstruct.songs.push(song);
+    }
 
     let playlistEmbed = new MessageEmbed()
       .setTitle(`${playlist.title}`)
-      .setURL(playlist.url)
+      .setURL(playlist.link)
       .setColor("#F8AA2A")
       .setTimestamp();
 
