@@ -10,7 +10,7 @@ module.exports = (Discord, client, message) => {
 
     const command =
         client.commands.get(cmd) || client.commands.find((cd) => cd.aliases && cd.aliases.includes(cmd));
-
+    if(!command) return
     if (!cooldowns.has(command.name)) {
         cooldowns.set(command.name, new Discord.Collection());
     }
