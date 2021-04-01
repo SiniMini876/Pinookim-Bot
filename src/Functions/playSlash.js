@@ -1,11 +1,13 @@
 const ytdlDiscord = require("ytdl-core-discord");
 const scdl = require("soundcloud-downloader");
 const { canModifyQueue } = require("./canModifyQueue");
+const guildID = "693864294911049829";
 
 module.exports = {
-    async play(song, message) {
+    async play(song, client, interaction, channel) {
         let PRUNING, SOUNDCLOUD_CLIENT_ID;
-
+        const member = channel.guild.members.cache.find(m => m.id === interaction.member.user.id)
+        const voiceChannel = client.voice.channel
         try {
             const config = require("../config.json");
             PRUNING = config.PRUNING;
@@ -14,11 +16,11 @@ module.exports = {
             PRUNING = process.env.PRUNING;
             SOUNDCLOUD_CLIENT_ID = process.env.SOUNDCLOUD_CLIENT_ID;
         }
-        const queue = message.client.queue.get(message.guild.id);
+        const queue = client.queue.get(channel.guild.id);
 
         if (!song) {
             queue.channel.leave();
-            message.client.queue.delete(message.guild.id);
+            client.queue.delete(channel.guild.id);
             return queue.textChannel.send("🚫 Music queue ended.").catch(console.error);
         }
 
@@ -50,14 +52,14 @@ module.exports = {
         } catch (error) {
             if (queue) {
                 queue.songs.shift();
-                module.exports.play(queue.songs[0], message);
+                module.exports.play(queue.songs[0], client, interaction, channel);
             }
 
             console.error(error);
-            return message.channel.send(`Error: ${error.message ? error.message : error}`);
+            return `Error: ${error.message ? error.message : error}`;
         }
 
-        queue.connection.on("disconnect", () => message.client.queue.delete(message.guild.id));
+        queue.connection.on("disconnect", () => client.queue.delete(channel.guild.id));
 
         const dispatcher = queue.connection
             .play(stream, { type: streamType })
@@ -69,17 +71,17 @@ module.exports = {
                     // so it can repeat endlessly
                     let lastSong = queue.songs.shift();
                     queue.songs.push(lastSong);
-                    module.exports.play(queue.songs[0], message);
+                    module.exports.play(queue.songs[0], client, interaction, channel);
                 } else {
                     // Recursively play the next song
                     queue.songs.shift();
-                    module.exports.play(queue.songs[0], message);
+                    module.exports.play(queue.songs[0], client, interaction, channel);
                 }
             })
             .on("error", (err) => {
                 console.error(err);
                 queue.songs.shift();
-                module.exports.play(queue.songs[0], message);
+                module.exports.play(queue.songs[0], client, interaction, channel);
             });
         dispatcher.setVolumeLogarithmic(queue.volume / 100);
 
@@ -99,14 +101,14 @@ module.exports = {
             console.error(error);
         }
 
-        const filter = (reaction, user) => user.id !== message.client.user.id;
+        const filter = (reaction, user) => user.id !== client.user.id;
         var collector = playingMessage.createReactionCollector(filter, {
             time: song.duration > 0 ? song.duration * 1000 : 600000
         });
 
         collector.on("collect", (reaction, user) => {
             if (!queue) return;
-            const member = message.guild.member(user);
+            const member = channel.guild.member(user);
 
             switch (reaction.emoji.name) {
                 case "⏭":
@@ -208,5 +210,6 @@ module.exports = {
                 playingMessage.delete({ timeout: 3000 }).catch(console.error);
             }
         });
+        return
     }
 };
